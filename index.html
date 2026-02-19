@@ -26,23 +26,61 @@ margin:0;
 background:#020617;
 color:var(--text-main);
 padding-bottom:90px;
+min-height:100vh;
 }
 .app-shell{max-width:1100px;margin:auto;padding:16px}
-.header{position:sticky;top:0;padding:15px 5px;background:#0f172a;display:flex;justify-content:space-between}
+.header{position:sticky;top:0;padding:15px 5px;background:#0f172a}
 .page{display:none}
 .active-page{display:block}
-.scanner-card{background:var(--card-soft);border-radius:24px;padding:12px;border:1px solid var(--border)}
-#reader{width:100%;border-radius:18px;overflow:hidden;background:#000}
-.card{background:#0f172a;padding:20px;border-radius:20px;margin-top:15px;border:1px solid var(--border)}
+.card{
+background:#0f172a;
+padding:20px;
+border-radius:20px;
+margin-top:15px;
+border:1px solid var(--border);
+}
 label{font-size:11px;color:var(--text-muted);display:block;margin:12px 0 5px}
-input{width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:#020617;color:white;font-size:16px}
-.btn-main{width:100%;padding:16px;margin-top:20px;border:none;border-radius:14px;background:#2563eb;color:white;font-weight:600}
+input{
+width:100%;
+padding:14px;
+border-radius:12px;
+border:1px solid var(--border);
+background:#020617;
+color:white;
+font-size:16px;
+}
+.btn-main{
+width:100%;
+padding:16px;
+margin-top:20px;
+border:none;
+border-radius:14px;
+background:#2563eb;
+color:white;
+font-weight:600;
+}
 table{width:100%;border-collapse:collapse;margin-top:10px}
 th{font-size:11px;color:var(--text-muted);padding:10px;border-bottom:1px solid var(--border)}
 td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.05)}
 .nav-shell{position:fixed;bottom:15px;width:100%;display:flex;justify-content:center}
-.nav{background:var(--nav-bg);width:90%;max-width:400px;height:65px;border-radius:30px;display:flex;border:1px solid var(--border)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);font-size:11px}
+.nav{
+background:var(--nav-bg);
+width:90%;
+max-width:400px;
+height:65px;
+border-radius:30px;
+display:flex;
+border:1px solid var(--border);
+}
+.nav-item{
+flex:1;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+color:var(--text-muted);
+font-size:11px;
+}
 .nav-item.active{color:var(--primary)}
 </style>
 </head>
@@ -52,24 +90,24 @@ td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.05)}
 <div class="app-shell">
 
 <header class="header">
-<div>Inventory Pro Cloud Sync</div>
+<div style="font-weight:600">Inventory Pro Cloud</div>
 </header>
 
 <main id="scan-page" class="page active-page">
-<div class="scanner-card"><div id="reader"></div></div>
-
 <div class="card">
+
 <label>Location</label>
 <input id="location">
 
 <label>Item ID</label>
-<input id="qr-result" readonly>
+<input id="qr-result" placeholder="Tap to scan" readonly onclick="openScanner()">
 
 <label>Quantity</label>
 <input type="number" id="quantity">
 
 <button class="btn-main" onclick="submitData()">Submit Entry</button>
 <div id="status" style="text-align:center;margin-top:12px"></div>
+
 </div>
 </main>
 
@@ -77,7 +115,11 @@ td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.05)}
 <div class="card">
 <table>
 <thead>
-<tr><th>Time</th><th>Item</th><th>Qty</th></tr>
+<tr>
+<th>Time</th>
+<th>Item</th>
+<th>Qty</th>
+</tr>
 </thead>
 <tbody id="history-body"></tbody>
 </table>
@@ -93,13 +135,15 @@ td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.05)}
 </nav>
 </div>
 
+<div id="scannerModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:999">
+<div id="reader" style="width:100%;height:100%"></div>
+</div>
+
 <script>
 const WEBAPP="https://script.google.com/macros/s/AKfycbyAUJb_jrTmGnbGeKYx9RCR5njmT7v-CF2HS0qCjxOmXn7XgGRn5a19c2gwnPDjaHH6xQ/exec";
 
-const html5QrCode=new Html5Qrcode("reader");
-html5QrCode.start({facingMode:"environment"},{fps:15,qrbox:250},txt=>{
-document.getElementById("qr-result").value=txt;
-});
+let html5QrCode;
+let scannerRunning=false;
 
 function showPage(id,el){
 document.querySelectorAll(".page").forEach(p=>p.classList.remove("active-page"));
@@ -107,6 +151,33 @@ document.getElementById(id).classList.add("active-page");
 document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
 el.classList.add("active");
 }
+
+function openScanner(){
+document.getElementById("scannerModal").style.display="block";
+html5QrCode=new Html5Qrcode("reader");
+html5QrCode.start(
+{facingMode:"environment"},
+{fps:15,qrbox:250},
+onScanSuccess
+);
+scannerRunning=true;
+}
+
+function closeScanner(){
+if(scannerRunning){
+html5QrCode.stop().then(()=>{
+document.getElementById("scannerModal").style.display="none";
+scannerRunning=false;
+});
+}
+}
+
+function onScanSuccess(text){
+document.getElementById("qr-result").value=text;
+closeScanner();
+}
+
+document.getElementById("scannerModal").addEventListener("click",closeScanner);
 
 async function submitData(){
 const id=document.getElementById("qr-result").value;
@@ -118,21 +189,21 @@ document.getElementById("status").innerText="Fill all fields";
 return;
 }
 
-document.getElementById("status").innerText="Saving...";
+document.getElementById("status").innerText="Saving";
 
 await fetch(WEBAPP,{
 method:"POST",
 body:JSON.stringify({location:loc,item:id,qty:qty})
 });
 
-addRowToTable(new Date(),id,qty);
+addRow(new Date(),id,qty);
 
 document.getElementById("qr-result").value="";
 document.getElementById("quantity").value="";
-document.getElementById("status").innerText="Saved to Cloud";
+document.getElementById("status").innerText="Saved";
 }
 
-function addRowToTable(time,id,qty){
+function addRow(time,id,qty){
 const tbody=document.getElementById("history-body");
 const row=tbody.insertRow(0);
 row.innerHTML="<td>"+new Date(time).toLocaleTimeString()+"</td><td>"+id+"</td><td>"+qty+"</td>";
@@ -142,7 +213,7 @@ async function loadHistory(){
 const res=await fetch(WEBAPP);
 const data=await res.json();
 data.reverse().forEach(r=>{
-if(r[2]) addRowToTable(r[0],r[2],r[3]);
+if(r[2]) addRow(r[0],r[2],r[3]);
 });
 }
 
