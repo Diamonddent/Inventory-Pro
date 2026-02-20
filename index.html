@@ -1,182 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inventory Scanner</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory QR Scanner</title>
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #0f172a;
-  color: white;
-  padding: 15px;
-}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #0f172a;
+      color: white;
+      padding: 15px;
+    }
 
-h2 {
-  margin-top: 0;
-}
+    h2 {
+      margin-top: 0;
+    }
 
-.card {
-  background: #1e293b;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
 
-input {
-  width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-  border-radius: 6px;
-  border: 1px solid #334155;
-  background: #0f172a;
-  color: white;
-  font-size: 16px;
-}
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: white;
+      font-size: 16px;
+    }
 
-button {
-  width: 100%;
-  padding: 14px;
-  background: #2563eb;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #2563eb;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-#reader {
-  width: 100%;
-  border-radius: 10px;
-  overflow: hidden;
-  background: black;
-}
+    button:disabled {
+      background: gray;
+    }
 
-#status {
-  margin-top: 10px;
-  text-align: center;
-  font-size: 14px;
-}
-</style>
+    #reader {
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      background: black;
+    }
+
+    #status {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
 </head>
 
 <body>
+  <h2>Inventory QR Scanner</h2>
 
-<h2>Inventory QR Scanner</h2>
+  <div class="card">
+    <div id="reader"></div>
+  </div>
 
-<div class="card">
-  <div id="reader"></div>
-</div>
+  <div class="card">
+    <label for="location">Location</label>
+    <input type="text" id="location" placeholder="Warehouse / Rack">
 
-<div class="card">
-  <label>Location</label>
-  <input type="text" id="location" placeholder="Warehouse / Rack">
+    <label for="qr-result">Item Code</label>
+    <input type="text" id="qr-result" readonly>
 
-  <label>Item Code</label>
-  <input type="text" id="qr-result" readonly>
+    <label for="quantity">Quantity</label>
+    <input type="number" id="quantity" placeholder="Enter quantity">
 
-  <label>Quantity</label>
-  <input type="number" id="quantity" placeholder="Enter quantity">
+    <button id="submit-btn">Submit</button>
 
-  <button id="submit-btn" onclick="submitData()">Submit</button>
-  <div id="status"></div>
-</div>
+    <div id="status"></div>
+  </div>
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUJb_jrTmGnbGeKYx9RCR5njmT7v-CF2HS0qCjxOmXn7XgGRn5a19c2gwnPDjaHH6xQ/exec";
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUJb_jrTmGnbGeKYx9RCR5njmT7v-CF2HS0qCjxOmXn7XgGRn5a19c2gwnPDjaHH6xQ/exec";
 
-let html5QrCode;
+    let html5QrCode;
 
-function startScanner() {
-  html5QrCode = new Html5Qrcode("reader");
+    function startScanner() {
+      html5QrCode = new Html5Qrcode("reader");
 
-  Html5Qrcode.getCameras().then(devices => {
-    if (devices && devices.length > 0) {
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length > 0) {
+          let backCamera = devices.find(device =>
+            device.label.toLowerCase().includes("back")
+          );
+          let cameraId = backCamera ? backCamera.id : devices[0].id;
 
-      let backCamera = devices.find(device =>
-        device.label.toLowerCase().includes("back")
-      );
-
-      let cameraId = backCamera ? backCamera.id : devices[0].id;
-
-      html5QrCode.start(
-        cameraId,
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 }
-        },
-        qrCodeMessage => {
-          document.getElementById("qr-result").value = qrCodeMessage;
-          document.getElementById("quantity").focus();
-          if (navigator.vibrate) navigator.vibrate(100);
-        },
-        errorMessage => {
+          html5QrCode.start(
+            cameraId,
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 250 }
+            },
+            qrCodeMessage => {
+              document.getElementById("qr-result").value = qrCodeMessage;
+              html5QrCode.stop();
+              document.getElementById("quantity").focus();
+              if (navigator.vibrate) navigator.vibrate(100);
+            }
+          ).catch(err => {
+            alert("Camera failed. Use HTTPS and allow permission.");
+            console.log(err);
+          });
+        } else {
+          alert("No camera found.");
         }
-      ).catch(err => {
-        alert("Camera failed to start. Use HTTPS and allow permission.");
+      }).catch(err => {
+        alert("Camera permission denied.");
         console.log(err);
       });
-
-    } else {
-      alert("No camera found.");
     }
-  }).catch(err => {
-    alert("Camera permission denied.");
-    console.log(err);
-  });
-}
 
-window.addEventListener("load", () => {
-  if (location.protocol !== "https:" && location.hostname !== "localhost") {
-    alert("Camera works only on HTTPS or localhost.");
-    return;
-  }
-  startScanner();
-});
-
-async function submitData() {
-  const btn = document.getElementById("submit-btn");
-  const status = document.getElementById("status");
-
-  const data = {
-    qrData: document.getElementById("qr-result").value,
-    quantity: document.getElementById("quantity").value,
-    location: document.getElementById("location").value
-  };
-
-  if (!data.qrData || !data.quantity) {
-    alert("Scan QR and enter quantity.");
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerText = "Sending...";
-  status.innerText = "Uploading...";
-
-  try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify(data)
+    window.addEventListener("load", () => {
+      if (location.protocol !== "https:" && location.hostname !== "localhost") {
+        alert("Camera works only on HTTPS or localhost.");
+        return;
+      }
+      startScanner();
     });
 
-    status.innerText = "Saved successfully.";
-    document.getElementById("qr-result").value = "";
-    document.getElementById("quantity").value = "";
+    document
+      .getElementById("submit-btn")
+      .addEventListener("click", submitData);
 
-  } catch (error) {
-    status.innerText = "Network error.";
-  }
+    async function submitData() {
+      const btn = document.getElementById("submit-btn");
+      const status = document.getElementById("status");
 
-  btn.disabled = false;
-  btn.innerText = "Submit";
-}
-</script>
+      const data = {
+        qrData: document.getElementById("qr-result").value,
+        quantity: document.getElementById("quantity").value,
+        location: document.getElementById("location").value
+      };
 
+      if (!data.qrData || !data.quantity) {
+        alert("Scan QR and enter quantity.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Sending...";
+      status.innerText = "Uploading...";
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+          status.innerText = "Saved successfully.";
+          document.getElementById("qr-result").value = "";
+          document.getElementById("quantity").value = "";
+          document.getElementById("location").value = "";
+          startScanner();
+        } else {
+          status.innerText = "Server error.";
+        }
+      } catch (error) {
+        status.innerText = "Network error.";
+      }
+
+      btn.disabled = false;
+      btn.innerText = "Submit";
+    }
+  </script>
 </body>
 </html>
