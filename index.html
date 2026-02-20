@@ -301,13 +301,24 @@
     }
 
     async function submitData() {
-      const btn = document.getElementById('submit-btn');
-      const status = document.getElementById('status');
-      const data = {
-        qrData: document.getElementById('qr-result').value.trim(),
-        quantity: document.getElementById('quantity').value.trim(),
-        location: document.getElementById('location').value.trim()
-      };
+  // ... (keep your existing data gathering logic) ...
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      // Changing Content-Type to text/plain avoids the "Pre-flight" block
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(data) 
+    });
+
+    // ... (keep your success logic) ...
+    status.innerHTML = "<span style='color:var(--success)'>✅ Saved!</span>";
+  } catch (e) {
+    status.innerHTML = "<span style='color:var(--danger)'>❌ Error: " + e.message + "</span>";
+  }
+};
 
       console.log('Submitting data:', data);
 
