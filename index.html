@@ -771,4 +771,182 @@
     });
 
     function haptic(ms) {
-      if (n
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
+
+    function showToast(message, type = 'success') {
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function updateEntryCount() {
+      const count = entries.length;
+      entryCount.textContent = count > 0 ? `${count} entries cached` : 'Ready to scan';
+      logCount.textContent = `${count} entries`;
+      
+      // Show/hide clear button based on entries
+      clearBtn.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    function switchTab(tab) {
+      const isScan = tab === 'scan';
+      document.getElementById('view-scan').classList.toggle('hidden', !isScan);
+      document.getElementById('view-history').classList.toggle('hidden', isScan);
+      document.getElementById('btn-scan').classList.toggle('active', isScan);
+      document.getElementById('btn-hist').classList.toggle('active', !isScan);
+      
+      // Reset clear button state when switching away
+      if (!isScan) {
+        resetClearButton();
+      }
+      
+      if(isScan) {
+        setTimeout(() => assetIn.focus(), 100);
+      } else {
+        renderHistory();
+      }
+    }
+
+    function resetClearButton() {
+      clearBtn.classList.remove('confirming');
+      clearText.textContent = 'Clear All Logs';
+      if (clearConfirmTimeout) {
+        clearTimeout(clearConfirmTimeout);
+        clearConfirmTimeout = null;
+      }
+    }
+
+    function handleClearClick() {
+      if (entries.length === 0) return;
+      
+      if (!clearBtn.classList.contains('confirming')) {
+        // First click - ask for confirmation
+        clearBtn.classList.add('confirming');
+        clearText.textContent = 'Click again to confirm';
+        showToast('Click again to clear all logs', 'warning');
+        haptic([50, 100, 50]);
+        
+        // Auto-reset after 3 seconds
+        clearConfirmTimeout = setTimeout(() => {
+          resetClearButton();
+        }, 3000);
+      } else {
+        // Second click - confirm clear
+        clearLogs();
+      }
+    }
+
+    function clearLogs() {
+      // Animate rows clearing
+      const rows = document.querySelectorAll('#history-body tr:not(.empty-row)');
+      rows.forEach((row, index) => {
+        setTimeout(() => {
+          row.classList.add('clearing');
+        }, index * 50);
+      });
+      
+      // Clear data after animation
+      setTimeout(() => {
+        entries = [];
+        localStorage.removeItem('diamond_entries');
+        updateEntryCount();
+        renderHistory();
+        resetClearButton();
+        showToast('All logs cleared');
+        haptic([30, 50, 30]);
+      }, rows.length * 50 + 400);
+    }
+
+    function renderHistory() {
+      const tbody = document.getElementById('history-body');
+      if (entries.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <div>No entries yet</div>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = entries.slice().reverse().map((entry, index) => `
+        <tr style="animation-delay: ${index * 0.05}s">
+          <td class="col-id">${entry.qrData}</td>
+          <td class="col-loc">${entry.location || 'N/A'}</td>
+          <td class="col-time">${entry.time}</td>
+          <td class="col-qty">${entry.quantity}</td>
+        </tr>
+      `).join('');
+    }
+
+    function pushData() {
+      const payload = {
+        location: locIn.value.trim(),
+        qrData: assetIn.value.trim(),
+        quantity: qtyIn.value.trim(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      if (!payload.qrData || !payload.quantity) {
+        showToast('Please fill in all fields', 'error');
+        haptic([50, 50, 50]);
+        return;
+      }
+
+      haptic(50);
+      localStorage.setItem('turbo_loc', payload.location);
+
+      entries.push(payload);
+      localStorage.setItem('diamond_entries', JSON.stringify(entries));
+      updateEntryCount();
+
+      submitBtn.classList.add('success');
+      submitBtn.innerHTML = '<span>✓ Uploaded</span>';
+      setTimeout(() => {
+        submitBtn.classList.remove('success');
+        submitBtn.innerHTML = '<span>Upload Entry</span>';
+      }, 1500);
+
+      showToast('Entry saved successfully');
+
+      assetIn.value = "";
+      qtyIn.value = "";
+      assetIn.focus();
+
+      syncDot.classList.add('syncing');
+      statusText.textContent = 'Syncing...';
+      
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      }).then(() => {
+        syncDot.classList.remove('syncing');
+        syncDot.style.background = "var(--success)";
+        statusText.textContent = 'Online';
+        showToast('Synced to cloud');
+      }).catch(() => {
+        syncDot.classList.remove('syncing');
+        syncDot.classList.add('error');
+        statusText.textContent = 'Offline';
+        showToast('Saved locally - sync failed', 'error');
+        setTimeout(() => {
+          syncDot.classList.remove('error');
+          syncDot.style.background = "var(--success)";
+          statusText.textContent = 'Online';
+        }, 3000);
+      });
+    }
+  </script>
+</body>
+</html>
