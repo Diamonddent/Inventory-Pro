@@ -2,264 +2,142 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Inventory Pro Max</title>
-<script src="https://unpkg.com/html5-qr-code"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Scanner</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-:root {
-  --primary: #2563eb;
-  --primary-soft: rgba(37, 99, 235, 0.12);
-  --success: #22c55e;
-  --danger: #ef4444;
-  --card-soft: #0f172a;
-  --border: #1e293b;
-  --text-main: #e5e7eb;
-  --text-muted: #64748b;
-  --nav-bg: rgba(15,23,42,0.98);
-}
-
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-@media (min-width: 768px) {
-  body::before {
-    content: "Mobile View Only. Open on smartphone.";
-    position: fixed;
-    inset: 0;
-    background: #020617;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    z-index: 9999;
-  }
-  body > * { filter: blur(6px); pointer-events: none; }
-}
-
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: Arial, sans-serif;
   margin: 0;
-  background: #020617;
-  color: var(--text-main);
-  padding-bottom: 90px;
+  background: #0f172a;
+  color: white;
+  padding: 15px;
 }
 
-.app-shell { max-width: 480px; margin: 0 auto; padding: 12px; }
-
-.header {
-  position: sticky;
-  top: 0;
-  padding: 15px 5px;
-  background: rgba(15,23,42,0.9);
-  display: flex;
-  align-items: center;
+h2 {
+  margin-top: 0;
 }
-
-.app-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #38bdf8, #2563eb);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-}
-
-.page { display: none; }
-.active-page { display: block; }
-
-.scanner-card {
-  background: var(--card-soft);
-  border-radius: 20px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  margin-top: 10px;
-}
-
-#reader { width: 100%; border-radius: 16px; overflow: hidden; background: #000; }
 
 .card {
-  background: rgba(15,23,42,0.6);
-  padding: 20px;
-  border-radius: 20px;
-  margin-top: 15px;
-  border: 1px solid var(--border);
-}
-
-label {
-  display: block;
-  font-size: 11px;
-  color: var(--text-muted);
-  margin: 12px 0 5px;
-  font-weight: 600;
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
 }
 
 input {
   width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: #020617;
-  color: white;
-  font-size: 16px;
-  outline: none;
-}
-
-.btn-main {
-  width: 100%;
-  padding: 16px;
-  margin-top: 20px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(to right, #2563eb, #4f46e5);
-  color: white;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-th {
-  text-align: left;
-  font-size: 11px;
-  color: var(--text-muted);
-  padding: 10px;
-  border-bottom: 1px solid var(--border);
-}
-td {
-  padding: 10px;
-  font-size: 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.btn-edit {
-  background: var(--primary-soft);
-  color: #60a5fa;
-  border: 1px solid var(--primary);
-  padding: 4px 8px;
+  padding: 12px;
+  margin-top: 8px;
+  margin-bottom: 12px;
   border-radius: 6px;
-  font-size: 11px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: white;
+  font-size: 16px;
 }
 
-.nav-shell {
-  position: fixed;
-  bottom: 15px;
+button {
   width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.nav {
-  background: var(--nav-bg);
-  width: 90%;
-  max-width: 400px;
-  height: 65px;
-  border-radius: 30px;
-  display: flex;
-  border: 1px solid var(--border);
-}
-
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  font-size: 11px;
+  padding: 14px;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
 }
 
-.nav-item.active { color: var(--primary); }
+#reader {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: black;
+}
+
+#status {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="app-shell">
+<h2>Inventory QR Scanner</h2>
 
-<header class="header">
-  <div class="app-icon">📦</div>
-  <div>
-    <div style="font-weight:600;">Inventory Pro</div>
-    <div style="font-size:11px; color:var(--text-muted);">Cloud Sync Active</div>
-  </div>
-</header>
-
-<main id="scan-page" class="page active-page">
-  <div class="scanner-card">
-    <div id="reader"></div>
-  </div>
-
-  <div class="card">
-    <label>Location</label>
-    <input type="text" id="location" placeholder="Warehouse / Rack">
-
-    <label>Item ID</label>
-    <input type="text" id="qr-result" readonly>
-
-    <label>Quantity</label>
-    <input type="number" id="quantity">
-
-    <button class="btn-main" id="submit-btn" onclick="submitData()">Submit Entry</button>
-    <div id="status" style="text-align:center; margin-top:12px;"></div>
-  </div>
-</main>
-
-<main id="history-page" class="page">
-  <div style="padding:10px 5px; display:flex; justify-content:space-between;">
-    <h3 style="margin:0;">Recent Logs</h3>
-    <span id="log-count" style="font-size:12px;">0 items</span>
-  </div>
-
-  <div class="card" style="padding:5px;">
-    <table>
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Item</th>
-          <th>Qty</th>
-          <th>Edit</th>
-        </tr>
-      </thead>
-      <tbody id="history-body"></tbody>
-    </table>
-  </div>
-</main>
-
+<div class="card">
+  <div id="reader"></div>
 </div>
 
-<div class="nav-shell">
-<nav class="nav">
-  <div class="nav-item active" onclick="showPage('scan-page', this)">📷<div>Scan</div></div>
-  <div class="nav-item" onclick="showPage('history-page', this)">📜<div>History</div></div>
-</nav>
+<div class="card">
+  <label>Location</label>
+  <input type="text" id="location" placeholder="Warehouse / Rack">
+
+  <label>Item Code</label>
+  <input type="text" id="qr-result" readonly>
+
+  <label>Quantity</label>
+  <input type="number" id="quantity" placeholder="Enter quantity">
+
+  <button id="submit-btn" onclick="submitData()">Submit</button>
+  <div id="status"></div>
 </div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUJb_jrTmGnbGeKYx9RCR5njmT7v-CF2HS0qCjxOmXn7XgGRn5a19c2gwnPDjaHH6xQ/exec";
 
-const html5QrCode = new Html5Qrcode("reader");
+let html5QrCode;
 
-html5QrCode.start(
-  { facingMode: "environment" },
-  { fps: 15, qrbox: 250 },
-  (text) => {
-    document.getElementById("qr-result").value = text;
-    document.getElementById("quantity").focus();
-    if (navigator.vibrate) navigator.vibrate(50);
-  }
-);
+function startScanner() {
+  html5QrCode = new Html5Qrcode("reader");
 
-function showPage(pageId, el) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page"));
-  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-  document.getElementById(pageId).classList.add("active-page");
-  el.classList.add("active");
+  Html5Qrcode.getCameras().then(devices => {
+    if (devices && devices.length > 0) {
+
+      let backCamera = devices.find(device =>
+        device.label.toLowerCase().includes("back")
+      );
+
+      let cameraId = backCamera ? backCamera.id : devices[0].id;
+
+      html5QrCode.start(
+        cameraId,
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
+        },
+        qrCodeMessage => {
+          document.getElementById("qr-result").value = qrCodeMessage;
+          document.getElementById("quantity").focus();
+          if (navigator.vibrate) navigator.vibrate(100);
+        },
+        errorMessage => {
+        }
+      ).catch(err => {
+        alert("Camera failed to start. Use HTTPS and allow permission.");
+        console.log(err);
+      });
+
+    } else {
+      alert("No camera found.");
+    }
+  }).catch(err => {
+    alert("Camera permission denied.");
+    console.log(err);
+  });
 }
+
+window.addEventListener("load", () => {
+  if (location.protocol !== "https:" && location.hostname !== "localhost") {
+    alert("Camera works only on HTTPS or localhost.");
+    return;
+  }
+  startScanner();
+});
 
 async function submitData() {
   const btn = document.getElementById("submit-btn");
@@ -272,13 +150,13 @@ async function submitData() {
   };
 
   if (!data.qrData || !data.quantity) {
-    alert("Scan and enter quantity");
+    alert("Scan QR and enter quantity.");
     return;
   }
 
   btn.disabled = true;
-  btn.innerText = "Syncing...";
-  status.innerText = "Sending...";
+  btn.innerText = "Sending...";
+  status.innerText = "Uploading...";
 
   try {
     await fetch(SCRIPT_URL, {
@@ -287,47 +165,16 @@ async function submitData() {
       body: JSON.stringify(data)
     });
 
-    const res = {
-      time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
-      ...data
-    };
-
-    addToHistory(res);
-
+    status.innerText = "Saved successfully.";
     document.getElementById("qr-result").value = "";
     document.getElementById("quantity").value = "";
-    status.innerText = "Saved";
-  } catch {
-    status.innerText = "Network Error";
+
+  } catch (error) {
+    status.innerText = "Network error.";
   }
 
   btn.disabled = false;
-  btn.innerText = "Submit Entry";
-}
-
-function addToHistory(res) {
-  const tbody = document.getElementById("history-body");
-  const row = tbody.insertRow(0);
-  row.innerHTML = `
-    <td>${res.time}</td>
-    <td>${res.qrData}</td>
-    <td class="qty-val">${res.quantity}</td>
-    <td><button class="btn-edit" onclick="editEntry(this, '${res.qrData}', '${res.quantity}')">Edit</button></td>
-  `;
-  document.getElementById("log-count").innerText = tbody.rows.length + " items";
-}
-
-function editEntry(btn, id, oldQty) {
-  const newQty = prompt("Edit quantity for " + id, oldQty);
-  if (!newQty || newQty === oldQty) return;
-
-  btn.closest("tr").querySelector(".qty-val").innerText = newQty;
-
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify({ action: "edit", qrData: id, quantity: newQty })
-  });
+  btn.innerText = "Submit";
 }
 </script>
 
