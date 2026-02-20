@@ -6,53 +6,21 @@
 <title>Inventory Scanner</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #0f172a;
-  color: white;
-  padding: 15px;
-}
-
-h2 { margin-top: 0; }
-
-.card {
-  background: #1e293b;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
-
-input {
-  width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-  border-radius: 6px;
-  border: 1px solid #334155;
-  background: #0f172a;
-  color: white;
-  font-size: 16px;
-}
-
-button {
-  width: 100%;
-  padding: 14px;
-  background: #2563eb;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-button:disabled { background: gray; }
-
-#status { margin-top: 10px; text-align: center; font-size: 14px; }
+body { font-family: Arial; margin:0; padding:15px; background:#0f172a; color:white; }
+h2 { margin-top:0; }
+.card { background:#1e293b; padding:15px; border-radius:10px; margin-bottom:15px; }
+input { width:100%; padding:12px; margin:8px 0 12px 0; border-radius:6px; border:1px solid #334155; background:#0f172a; color:white; font-size:16px; }
+button { width:100%; padding:14px; background:#2563eb; border:none; border-radius:8px; color:white; font-size:16px; cursor:pointer; }
+button:disabled { background:gray; }
+#status { margin-top:10px; text-align:center; font-size:14px; }
+#history { margin-top:15px; font-size:14px; }
+#history table { width:100%; border-collapse:collapse; }
+#history th, #history td { padding:6px; border:1px solid #334155; text-align:center; }
+#history th { background:#2563eb; color:white; }
 </style>
 </head>
-
 <body>
+
 <h2>Inventory Scanner</h2>
 
 <div class="card">
@@ -69,17 +37,52 @@ button:disabled { background: gray; }
   <div id="status"></div>
 </div>
 
+<div class="card" id="history">
+  <h3>Last 10 Scanned Entries</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Item ID</th>
+        <th>Quantity</th>
+        <th>Location</th>
+      </tr>
+    </thead>
+    <tbody id="history-body"></tbody>
+  </table>
+</div>
+
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyQdTWtiE1cs1wfKfbJOnBKBKbwSVI7ebxt90xQIh3QXYzt1Kn0jp-xH7vvuwgOudOUbQ/exec";
+
+async function loadHistory() {
+  try {
+    const response = await fetch(SCRIPT_URL);
+    const data = await response.json();
+    const tbody = document.getElementById("history-body");
+    tbody.innerHTML = "";
+    data.reverse().forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${row.time ? new Date(row.time).toLocaleString() : ""}</td>
+                      <td>${row.itemID || ""}</td>
+                      <td>${row.quantity || ""}</td>
+                      <td>${row.location || ""}</td>`;
+      tbody.appendChild(tr);
+    });
+  } catch(e) {
+    console.log("History load error", e);
+  }
+}
 
 document.getElementById("submit-btn").addEventListener("click", async () => {
   const btn = document.getElementById("submit-btn");
   const status = document.getElementById("status");
 
+  const locationField = document.getElementById("location");
   const data = {
     qrData: document.getElementById("qr-result").value.trim(),
     quantity: document.getElementById("quantity").value.trim(),
-    location: document.getElementById("location").value.trim()
+    location: locationField.value.trim()
   };
 
   if (!data.qrData || !data.quantity) {
@@ -92,7 +95,6 @@ document.getElementById("submit-btn").addEventListener("click", async () => {
   status.innerText = "Uploading...";
 
   try {
-    // Use no-cors mode to avoid CORS errors with Google Apps Script
     await fetch(SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -100,20 +102,28 @@ document.getElementById("submit-btn").addEventListener("click", async () => {
       mode: "no-cors"
     });
 
-    // Since no-cors is opaque, assume success
     status.innerText = "Saved successfully.";
     document.getElementById("qr-result").value = "";
     document.getElementById("quantity").value = "";
-    document.getElementById("location").value = "";
     document.getElementById("qr-result").focus();
 
-  } catch (error) {
+    // reload history after submit
+    loadHistory();
+
+    // location persists until changed
+  } catch (e) {
     status.innerText = "Network error.";
   }
 
   btn.disabled = false;
   btn.innerText = "Submit";
 });
+
+// focus on Item ID field by default
+document.getElementById("qr-result").focus();
+
+// load last 10 entries on page load
+loadHistory();
 </script>
 </body>
 </html>
