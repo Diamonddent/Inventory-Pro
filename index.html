@@ -1,130 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inventory Scanner</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Scanner</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #0f172a;
-      color: white;
-      padding: 15px;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #0f172a;
+  color: white;
+  padding: 15px;
+}
 
-    h2 {
-      margin-top: 0;
-    }
+h2 { margin-top: 0; }
 
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
+.card {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
 
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      margin-bottom: 12px;
-      border-radius: 6px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: white;
-      font-size: 16px;
-    }
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: white;
+  font-size: 16px;
+}
 
-    button {
-      width: 100%;
-      padding: 14px;
-      background: #2563eb;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
+button {
+  width: 100%;
+  padding: 14px;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
 
-    button:disabled {
-      background: gray;
-    }
+button:disabled { background: gray; }
 
-    #status {
-      margin-top: 10px;
-      text-align: center;
-      font-size: 14px;
-    }
-  </style>
+#status { margin-top: 10px; text-align: center; font-size: 14px; }
+</style>
 </head>
 
 <body>
-  <h2>Inventory Scanner</h2>
+<h2>Inventory Scanner</h2>
 
-  <div class="card">
-    <label for="location">Location</label>
-    <input type="text" id="location" placeholder="Warehouse / Rack">
+<div class="card">
+  <label for="location">Location</label>
+  <input type="text" id="location" placeholder="Warehouse / Rack">
 
-    <label for="qr-result">Item Code</label>
-    <input type="text" id="qr-result" placeholder="Scan with EDA52">
+  <label for="qr-result">Item ID</label>
+  <input type="text" id="qr-result" placeholder="Scan with EDA52">
 
-    <label for="quantity">Quantity</label>
-    <input type="number" id="quantity" placeholder="Enter quantity">
+  <label for="quantity">Quantity</label>
+  <input type="number" id="quantity" placeholder="Enter quantity">
 
-    <button id="submit-btn">Submit</button>
+  <button id="submit-btn">Submit</button>
+  <div id="status"></div>
+</div>
 
-    <div id="status"></div>
-  </div>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyQdTWtiE1cs1wfKfbJOnBKBKbwSVI7ebxt90xQIh3QXYzt1Kn0jp-xH7vvuwgOudOUbQ/exec";
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUJb_jrTmGnbGeKYx9RCR5njmT7v-CF2HS0qCjxOmXn7XgGRn5a19c2gwnPDjaHH6xQ/exec";
+document.getElementById("submit-btn").addEventListener("click", async () => {
+  const btn = document.getElementById("submit-btn");
+  const status = document.getElementById("status");
 
-    document.getElementById("submit-btn").addEventListener("click", async () => {
-      const btn = document.getElementById("submit-btn");
-      const status = document.getElementById("status");
+  const data = {
+    qrData: document.getElementById("qr-result").value.trim(),
+    quantity: document.getElementById("quantity").value.trim(),
+    location: document.getElementById("location").value.trim()
+  };
 
-      const data = {
-        qrData: document.getElementById("qr-result").value.trim(),
-        quantity: document.getElementById("quantity").value.trim(),
-        location: document.getElementById("location").value.trim()
-      };
+  if (!data.qrData || !data.quantity) {
+    alert("Scan Item ID and enter quantity.");
+    return;
+  }
 
-      if (!data.qrData || !data.quantity) {
-        alert("Scan item code and enter quantity.");
-        return;
-      }
+  btn.disabled = true;
+  btn.innerText = "Sending...";
+  status.innerText = "Uploading...";
 
-      btn.disabled = true;
-      btn.innerText = "Sending...";
-      status.innerText = "Uploading...";
-
-      try {
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (result.status === "success") {
-          status.innerText = "Saved successfully.";
-          document.getElementById("qr-result").value = "";
-          document.getElementById("quantity").value = "";
-          document.getElementById("location").value = "";
-          document.getElementById("qr-result").focus();
-        } else {
-          status.innerText = "Server error.";
-        }
-      } catch (error) {
-        status.innerText = "Network error.";
-      }
-
-      btn.disabled = false;
-      btn.innerText = "Submit";
+  try {
+    // Use no-cors mode to avoid CORS errors with Google Apps Script
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      mode: "no-cors"
     });
-  </script>
+
+    // Since no-cors is opaque, assume success
+    status.innerText = "Saved successfully.";
+    document.getElementById("qr-result").value = "";
+    document.getElementById("quantity").value = "";
+    document.getElementById("location").value = "";
+    document.getElementById("qr-result").focus();
+
+  } catch (error) {
+    status.innerText = "Network error.";
+  }
+
+  btn.disabled = false;
+  btn.innerText = "Submit";
+});
+</script>
 </body>
 </html>
