@@ -2,86 +2,178 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Inventory Pro Max</title>
-
 <script src="https://unpkg.com/html5-qr-code"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-:root{
---primary:#2563eb;
---primary-soft:rgba(37,99,235,0.12);
---bg:#020617;
---card-soft:#0f172a;
---border:#1e293b;
---text-main:#e5e7eb;
---text-muted:#64748b;
---nav-bg:rgba(15,23,42,0.98);
+:root {
+  --primary: #2563eb;
+  --primary-soft: rgba(37, 99, 235, 0.12);
+  --success: #22c55e;
+  --danger: #ef4444;
+  --card-soft: #0f172a;
+  --border: #1e293b;
+  --text-main: #e5e7eb;
+  --text-muted: #64748b;
+  --nav-bg: rgba(15,23,42,0.98);
 }
-*{box-sizing:border-box}
-body{
-font-family:Inter,sans-serif;
-margin:0;
-background:#020617;
-color:var(--text-main);
-padding-bottom:90px;
-min-height:100vh;
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+@media (min-width: 768px) {
+  body::before {
+    content: "Mobile View Only. Open on smartphone.";
+    position: fixed;
+    inset: 0;
+    background: #020617;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 9999;
+  }
+  body > * { filter: blur(6px); pointer-events: none; }
 }
-.app-shell{max-width:1100px;margin:auto;padding:16px}
-.header{position:sticky;top:0;padding:15px 5px;background:#0f172a}
-.page{display:none}
-.active-page{display:block}
-.card{
-background:#0f172a;
-padding:20px;
-border-radius:20px;
-margin-top:15px;
-border:1px solid var(--border);
+
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  background: #020617;
+  color: var(--text-main);
+  padding-bottom: 90px;
 }
-label{font-size:11px;color:var(--text-muted);display:block;margin:12px 0 5px}
-input{
-width:100%;
-padding:14px;
-border-radius:12px;
-border:1px solid var(--border);
-background:#020617;
-color:white;
-font-size:16px;
+
+.app-shell { max-width: 480px; margin: 0 auto; padding: 12px; }
+
+.header {
+  position: sticky;
+  top: 0;
+  padding: 15px 5px;
+  background: rgba(15,23,42,0.9);
+  display: flex;
+  align-items: center;
 }
-.btn-main{
-width:100%;
-padding:16px;
-margin-top:20px;
-border:none;
-border-radius:14px;
-background:#2563eb;
-color:white;
-font-weight:600;
+
+.app-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
 }
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th{font-size:11px;color:var(--text-muted);padding:10px;border-bottom:1px solid var(--border)}
-td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.05)}
-.nav-shell{position:fixed;bottom:15px;width:100%;display:flex;justify-content:center}
-.nav{
-background:var(--nav-bg);
-width:90%;
-max-width:400px;
-height:65px;
-border-radius:30px;
-display:flex;
-border:1px solid var(--border);
+
+.page { display: none; }
+.active-page { display: block; }
+
+.scanner-card {
+  background: var(--card-soft);
+  border-radius: 20px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  margin-top: 10px;
 }
-.nav-item{
-flex:1;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-color:var(--text-muted);
-font-size:11px;
+
+#reader { width: 100%; border-radius: 16px; overflow: hidden; background: #000; }
+
+.card {
+  background: rgba(15,23,42,0.6);
+  padding: 20px;
+  border-radius: 20px;
+  margin-top: 15px;
+  border: 1px solid var(--border);
 }
-.nav-item.active{color:var(--primary)}
+
+label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 12px 0 5px;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #020617;
+  color: white;
+  font-size: 16px;
+  outline: none;
+}
+
+.btn-main {
+  width: 100%;
+  padding: 16px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(to right, #2563eb, #4f46e5);
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th {
+  text-align: left;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 10px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.btn-edit {
+  background: var(--primary-soft);
+  color: #60a5fa;
+  border: 1px solid var(--primary);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.nav-shell {
+  position: fixed;
+  bottom: 15px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.nav {
+  background: var(--nav-bg);
+  width: 90%;
+  max-width: 400px;
+  height: 65px;
+  border-radius: 30px;
+  display: flex;
+  border: 1px solid var(--border);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.nav-item.active { color: var(--primary); }
 </style>
 </head>
 
@@ -90,134 +182,153 @@ font-size:11px;
 <div class="app-shell">
 
 <header class="header">
-<div style="font-weight:600">Inventory Pro Cloud</div>
+  <div class="app-icon">📦</div>
+  <div>
+    <div style="font-weight:600;">Inventory Pro</div>
+    <div style="font-size:11px; color:var(--text-muted);">Cloud Sync Active</div>
+  </div>
 </header>
 
 <main id="scan-page" class="page active-page">
-<div class="card">
+  <div class="scanner-card">
+    <div id="reader"></div>
+  </div>
 
-<label>Location</label>
-<input id="location">
+  <div class="card">
+    <label>Location</label>
+    <input type="text" id="location" placeholder="Warehouse / Rack">
 
-<label>Item ID</label>
-<input id="qr-result" placeholder="Tap to scan" readonly onclick="openScanner()">
+    <label>Item ID</label>
+    <input type="text" id="qr-result" readonly>
 
-<label>Quantity</label>
-<input type="number" id="quantity">
+    <label>Quantity</label>
+    <input type="number" id="quantity">
 
-<button class="btn-main" onclick="submitData()">Submit Entry</button>
-<div id="status" style="text-align:center;margin-top:12px"></div>
-
-</div>
+    <button class="btn-main" id="submit-btn" onclick="submitData()">Submit Entry</button>
+    <div id="status" style="text-align:center; margin-top:12px;"></div>
+  </div>
 </main>
 
 <main id="history-page" class="page">
-<div class="card">
-<table>
-<thead>
-<tr>
-<th>Time</th>
-<th>Item</th>
-<th>Qty</th>
-</tr>
-</thead>
-<tbody id="history-body"></tbody>
-</table>
-</div>
+  <div style="padding:10px 5px; display:flex; justify-content:space-between;">
+    <h3 style="margin:0;">Recent Logs</h3>
+    <span id="log-count" style="font-size:12px;">0 items</span>
+  </div>
+
+  <div class="card" style="padding:5px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>Edit</th>
+        </tr>
+      </thead>
+      <tbody id="history-body"></tbody>
+    </table>
+  </div>
 </main>
 
 </div>
 
 <div class="nav-shell">
 <nav class="nav">
-<div class="nav-item active" onclick="showPage('scan-page',this)">Scan</div>
-<div class="nav-item" onclick="showPage('history-page',this)">History</div>
+  <div class="nav-item active" onclick="showPage('scan-page', this)">📷<div>Scan</div></div>
+  <div class="nav-item" onclick="showPage('history-page', this)">📜<div>History</div></div>
 </nav>
 </div>
 
-<div id="scannerModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:999">
-<div id="reader" style="width:100%;height:100%"></div>
-</div>
-
 <script>
-const WEBAPP="https://script.google.com/macros/s/AKfycbyAUJb_jrTmGnbGeKYx9RCR5njmT7v-CF2HS0qCjxOmXn7XgGRn5a19c2gwnPDjaHH6xQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUJb_jrTmGnbGeKYx9RCR5njmT7v-CF2HS0qCjxOmXn7XgGRn5a19c2gwnPDjaHH6xQ/exec";
 
-let html5QrCode;
-let scannerRunning=false;
+const html5QrCode = new Html5Qrcode("reader");
 
-function showPage(id,el){
-document.querySelectorAll(".page").forEach(p=>p.classList.remove("active-page"));
-document.getElementById(id).classList.add("active-page");
-document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
-el.classList.add("active");
-}
-
-function openScanner(){
-document.getElementById("scannerModal").style.display="block";
-html5QrCode=new Html5Qrcode("reader");
 html5QrCode.start(
-{facingMode:"environment"},
-{fps:15,qrbox:250},
-onScanSuccess
+  { facingMode: "environment" },
+  { fps: 15, qrbox: 250 },
+  (text) => {
+    document.getElementById("qr-result").value = text;
+    document.getElementById("quantity").focus();
+    if (navigator.vibrate) navigator.vibrate(50);
+  }
 );
-scannerRunning=true;
+
+function showPage(pageId, el) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active-page");
+  el.classList.add("active");
 }
 
-function closeScanner(){
-if(scannerRunning){
-html5QrCode.stop().then(()=>{
-document.getElementById("scannerModal").style.display="none";
-scannerRunning=false;
-});
-}
-}
+async function submitData() {
+  const btn = document.getElementById("submit-btn");
+  const status = document.getElementById("status");
 
-function onScanSuccess(text){
-document.getElementById("qr-result").value=text;
-closeScanner();
-}
+  const data = {
+    qrData: document.getElementById("qr-result").value,
+    quantity: document.getElementById("quantity").value,
+    location: document.getElementById("location").value
+  };
 
-document.getElementById("scannerModal").addEventListener("click",closeScanner);
+  if (!data.qrData || !data.quantity) {
+    alert("Scan and enter quantity");
+    return;
+  }
 
-async function submitData(){
-const id=document.getElementById("qr-result").value;
-const qty=document.getElementById("quantity").value;
-const loc=document.getElementById("location").value;
+  btn.disabled = true;
+  btn.innerText = "Syncing...";
+  status.innerText = "Sending...";
 
-if(!id||!qty||!loc){
-document.getElementById("status").innerText="Fill all fields";
-return;
-}
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(data)
+    });
 
-document.getElementById("status").innerText="Saving";
+    const res = {
+      time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+      ...data
+    };
 
-await fetch(WEBAPP,{
-method:"POST",
-body:JSON.stringify({location:loc,item:id,qty:qty})
-});
+    addToHistory(res);
 
-addRow(new Date(),id,qty);
+    document.getElementById("qr-result").value = "";
+    document.getElementById("quantity").value = "";
+    status.innerText = "Saved";
+  } catch {
+    status.innerText = "Network Error";
+  }
 
-document.getElementById("qr-result").value="";
-document.getElementById("quantity").value="";
-document.getElementById("status").innerText="Saved";
-}
-
-function addRow(time,id,qty){
-const tbody=document.getElementById("history-body");
-const row=tbody.insertRow(0);
-row.innerHTML="<td>"+new Date(time).toLocaleTimeString()+"</td><td>"+id+"</td><td>"+qty+"</td>";
+  btn.disabled = false;
+  btn.innerText = "Submit Entry";
 }
 
-async function loadHistory(){
-const res=await fetch(WEBAPP);
-const data=await res.json();
-data.reverse().forEach(r=>{
-if(r[2]) addRow(r[0],r[2],r[3]);
-});
+function addToHistory(res) {
+  const tbody = document.getElementById("history-body");
+  const row = tbody.insertRow(0);
+  row.innerHTML = `
+    <td>${res.time}</td>
+    <td>${res.qrData}</td>
+    <td class="qty-val">${res.quantity}</td>
+    <td><button class="btn-edit" onclick="editEntry(this, '${res.qrData}', '${res.quantity}')">Edit</button></td>
+  `;
+  document.getElementById("log-count").innerText = tbody.rows.length + " items";
 }
 
-window.onload=loadHistory;
+function editEntry(btn, id, oldQty) {
+  const newQty = prompt("Edit quantity for " + id, oldQty);
+  if (!newQty || newQty === oldQty) return;
+
+  btn.closest("tr").querySelector(".qty-val").innerText = newQty;
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({ action: "edit", qrData: id, quantity: newQty })
+  });
+}
 </script>
 
 </body>
