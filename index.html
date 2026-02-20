@@ -17,6 +17,8 @@
       --success: #00ff88;
       --warning: #ffcc00;
       --error: #ff4444;
+      --danger: #ff3366;
+      --danger-glow: rgba(255, 51, 102, 0.4);
     }
 
     * { 
@@ -35,7 +37,6 @@
       padding-bottom: 100px;
     }
 
-    /* Animated Background Mesh */
     .bg-mesh {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -53,7 +54,6 @@
       66% { transform: translate(-20px, 20px) scale(0.9); }
     }
 
-    /* Grid Overlay */
     .grid-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -71,7 +71,6 @@
       padding: 25px; 
     }
 
-    /* Header */
     .app-header { 
       display: flex; 
       justify-content: space-between; 
@@ -168,7 +167,6 @@
       75% { transform: translateX(5px); }
     }
 
-    /* Glass Panels */
     .glass-panel {
       background: var(--card); 
       backdrop-filter: blur(20px);
@@ -194,7 +192,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Inputs */
     .input-wrap { 
       margin-bottom: 28px; 
       position: relative;
@@ -251,7 +248,6 @@
       transform: translateX(10px);
     }
 
-    /* Button */
     .btn-action {
       width: 100%; 
       padding: 18px; 
@@ -305,7 +301,74 @@
       100% { transform: scale(1); }
     }
 
-    /* Table Styling */
+    /* Clear Button Styles */
+    .clear-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--danger);
+      background: rgba(255, 51, 102, 0.1);
+      color: var(--danger);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .clear-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--danger);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+      z-index: -1;
+    }
+
+    .clear-btn:hover {
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px var(--danger-glow);
+      border-color: transparent;
+    }
+
+    .clear-btn:hover::before {
+      transform: scaleX(1);
+    }
+
+    .clear-btn:active {
+      transform: scale(0.98);
+    }
+
+    .clear-btn svg {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .clear-btn:hover svg {
+      transform: rotate(90deg);
+    }
+
+    .clear-btn.confirming {
+      background: var(--danger);
+      color: #fff;
+      animation: pulseDanger 1s infinite;
+    }
+
+    @keyframes pulseDanger {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.4); }
+      50% { box-shadow: 0 0 20px 5px rgba(255, 51, 102, 0.2); }
+    }
+
     .table-container { 
       overflow-x: auto; 
       width: 100%;
@@ -348,6 +411,17 @@
       color: #fff;
     }
 
+    tr.clearing {
+      animation: clearOut 0.4s ease forwards;
+    }
+
+    @keyframes clearOut {
+      to {
+        opacity: 0;
+        transform: translateX(-100%);
+      }
+    }
+
     @keyframes fadeInRow {
       from { 
         opacity: 0; 
@@ -385,7 +459,6 @@
       font-family: 'Courier New', monospace;
     }
 
-    /* Empty State */
     .empty-state {
       text-align: center;
       padding: 40px 20px;
@@ -399,7 +472,6 @@
       stroke: var(--accent);
     }
 
-    /* Bottom Dock */
     .dock-container { 
       position: fixed; 
       bottom: 30px; 
@@ -468,7 +540,6 @@
       background: rgba(255,255,255,0.05);
     }
 
-    /* View Transitions */
     .view {
       animation: fadeIn 0.4s ease;
     }
@@ -482,7 +553,6 @@
       display: none; 
     }
 
-    /* Scan Line Effect */
     .scan-line {
       position: absolute;
       top: 0; left: 0; right: 0;
@@ -504,7 +574,6 @@
       100% { transform: translateY(50px); opacity: 0; }
     }
 
-    /* Toast Notification */
     .toast {
       position: fixed;
       top: 25px;
@@ -529,8 +598,8 @@
 
     .toast.success { border-color: var(--success); color: var(--success); }
     .toast.error { border-color: var(--error); color: var(--error); }
+    .toast.warning { border-color: var(--warning); color: var(--warning); }
 
-    /* Stats Badge */
     .stats-badge {
       display: inline-flex;
       align-items: center;
@@ -550,7 +619,6 @@
       50% { opacity: 0.7; }
     }
 
-    /* Responsive */
     @media (max-width: 480px) {
       .container { padding: 20px; }
       .glass-panel { padding: 24px; }
@@ -642,6 +710,13 @@
             </tbody>
           </table>
         </div>
+
+        <button class="clear-btn" id="clear-btn" onclick="handleClearClick()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          <span id="clear-text">Clear All Logs</span>
+        </button>
       </div>
     </div>
   </div>
@@ -665,8 +740,11 @@
     const toast = document.getElementById('toast');
     const entryCount = document.getElementById('entry-count');
     const logCount = document.getElementById('log-count');
+    const clearBtn = document.getElementById('clear-btn');
+    const clearText = document.getElementById('clear-text');
 
     let entries = JSON.parse(localStorage.getItem('diamond_entries') || '[]');
+    let clearConfirmTimeout = null;
 
     window.onload = () => {
       locIn.value = localStorage.getItem('turbo_loc') || "";
@@ -693,129 +771,4 @@
     });
 
     function haptic(ms) {
-      if (navigator.vibrate) navigator.vibrate(ms);
-    }
-
-    function showToast(message, type = 'success') {
-      toast.textContent = message;
-      toast.className = `toast ${type} show`;
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
-
-    function updateEntryCount() {
-      const count = entries.length;
-      entryCount.textContent = count > 0 ? `${count} entries cached` : 'Ready to scan';
-      logCount.textContent = `${count} entries`;
-    }
-
-    function switchTab(tab) {
-      const isScan = tab === 'scan';
-      document.getElementById('view-scan').classList.toggle('hidden', !isScan);
-      document.getElementById('view-history').classList.toggle('hidden', isScan);
-      document.getElementById('btn-scan').classList.toggle('active', isScan);
-      document.getElementById('btn-hist').classList.toggle('active', !isScan);
-      
-      if(isScan) {
-        setTimeout(() => assetIn.focus(), 100);
-      } else {
-        renderHistory();
-      }
-    }
-
-    function renderHistory() {
-      const tbody = document.getElementById('history-body');
-      if (entries.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="4">
-              <div class="empty-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                </svg>
-                <div>No entries yet</div>
-              </div>
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = entries.slice().reverse().map((entry, index) => `
-        <tr style="animation-delay: ${index * 0.05}s">
-          <td class="col-id">${entry.qrData}</td>
-          <td class="col-loc">${entry.location || 'N/A'}</td>
-          <td class="col-time">${entry.time}</td>
-          <td class="col-qty">${entry.quantity}</td>
-        </tr>
-      `).join('');
-    }
-
-    function pushData() {
-      const payload = {
-        location: locIn.value.trim(),
-        qrData: assetIn.value.trim(),
-        quantity: qtyIn.value.trim(),
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      if (!payload.qrData || !payload.quantity) {
-        showToast('Please fill in all fields', 'error');
-        haptic([50, 50, 50]);
-        return;
-      }
-
-      // Haptic & Local Storage
-      haptic(50);
-      localStorage.setItem('turbo_loc', payload.location);
-
-      // Add to entries
-      entries.push(payload);
-      localStorage.setItem('diamond_entries', JSON.stringify(entries));
-      updateEntryCount();
-
-      // Button success animation
-      submitBtn.classList.add('success');
-      submitBtn.innerHTML = '<span>✓ Uploaded</span>';
-      setTimeout(() => {
-        submitBtn.classList.remove('success');
-        submitBtn.innerHTML = '<span>Upload Entry</span>';
-      }, 1500);
-
-      showToast('Entry saved successfully');
-
-      // Reset Form
-      assetIn.value = "";
-      qtyIn.value = "";
-      assetIn.focus();
-
-      // Background Sync
-      syncDot.classList.add('syncing');
-      statusText.textContent = 'Syncing...';
-      
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(payload)
-      }).then(() => {
-        syncDot.classList.remove('syncing');
-        syncDot.style.background = "var(--success)";
-        statusText.textContent = 'Online';
-        showToast('Synced to cloud');
-      }).catch(() => {
-        syncDot.classList.remove('syncing');
-        syncDot.classList.add('error');
-        statusText.textContent = 'Offline';
-        showToast('Saved locally - sync failed', 'error');
-        setTimeout(() => {
-          syncDot.classList.remove('error');
-          syncDot.style.background = "var(--success)";
-          statusText.textContent = 'Online';
-        }, 3000);
-      });
-    }
-  </script>
-</body>
-</html>
+      if (n
