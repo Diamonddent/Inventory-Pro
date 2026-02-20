@@ -23,6 +23,7 @@
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+    /* MOBILE ONLY ENFORCEMENT */
     @media (min-width: 768px) {
       body::before {
         content: "📱 Mobile View Only. Please open this app on your smartphone.";
@@ -53,6 +54,7 @@
 
     .app-shell { max-width: 480px; margin: 0 auto; padding: 10px 12px; }
 
+    /* Header */
     .header {
       position: sticky;
       top: 0;
@@ -71,9 +73,11 @@
       box-shadow: 0 0 20px rgba(37,99,235,0.4);
     }
 
+    /* Pages */
     .page { display: none; animation: fadeIn 0.3s ease; }
     .active-page { display: block; }
 
+    /* Scanner info card */
     .scanner-card {
       background: var(--card-soft);
       border-radius: 24px;
@@ -85,6 +89,7 @@
       color: var(--text-muted);
     }
 
+    /* Inputs */
     .card {
       background: rgba(15,23,42,0.6);
       padding: 20px;
@@ -129,6 +134,7 @@
     }
     .btn-main:active { transform: scale(0.98); }
 
+    /* History Table */
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th {
       text-align: left;
@@ -151,6 +157,7 @@
       font-size: 11px;
     }
 
+    /* Nav */
     .nav-shell {
       position: fixed;
       bottom: 15px;
@@ -202,7 +209,7 @@
     <main id="scan-page" class="page active-page">
       <div class="scanner-card">
         Focus the “Item ID” field and scan with the EDA52 scanner.  
-        The scanned code will appear automatically.
+        The scanned code will appear automatically, then cursor jumps to Quantity.
       </div>
 
       <div class="card">
@@ -269,11 +276,20 @@
       localStorage.setItem('inv_location', e.target.value);
     });
 
-    // Optional: when scanner sends Enter after code, move to quantity
+    // After scanner sends Enter in Item ID, go to Quantity
     document.getElementById('qr-result').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
+        if (navigator.vibrate) navigator.vibrate(30);
         document.getElementById('quantity').focus();
+      }
+    });
+
+    // Press Enter in Quantity to auto-submit
+    document.getElementById('quantity').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitData();
       }
     });
 
@@ -292,6 +308,8 @@
         quantity: document.getElementById('quantity').value.trim(),
         location: document.getElementById('location').value.trim()
       };
+
+      console.log('Submitting data:', data);
 
       if (!data.qrData || !data.quantity) {
         alert("Scan item and enter quantity!");
@@ -322,6 +340,7 @@
 
         status.innerHTML = "<span style='color:var(--success)'>✅ Saved Successfully!</span>";
       } catch (e) {
+        console.error(e);
         status.innerHTML = "<span style='color:var(--danger)'>❌ Network Error</span>";
       } finally {
         btn.disabled = false;
@@ -345,9 +364,9 @@
     }
 
     async function editEntry(rowKey, oldQty, idLabel) {
-      const newQty = prompt(\`Edit Quantity for ${idLabel}:\`, oldQty);
+      const newQty = prompt(`Edit Quantity for ${idLabel}:`, oldQty);
       if (newQty && newQty !== oldQty) {
-        const row = document.getElementById(\`row-${rowKey}\`);
+        const row = document.getElementById(`row-${rowKey}`);
         if (row) {
           row.querySelector('.qty-val').innerText = newQty;
         }
