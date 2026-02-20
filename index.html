@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Inventory Pro Max</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -13,7 +12,6 @@
       --success: #22c55e;
       --danger: #ef4444;
       --bg: #020617;
-      --card: #020617;
       --card-soft: #0f172a;
       --border: #1e293b;
       --text-main: #e5e7eb;
@@ -22,25 +20,6 @@
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    /* MOBILE ONLY ENFORCEMENT */
-    @media (min-width: 768px) {
-      body::before {
-        content: "📱 Mobile View Only. Please open this app on your smartphone.";
-        position: fixed;
-        inset: 0;
-        background: #020617;
-        color: #e5e7eb;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 20px;
-        z-index: 9999;
-        font-family: 'Inter', sans-serif;
-      }
-      body > * { filter: blur(8px); pointer-events: none; }
-    }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -54,18 +33,12 @@
 
     .app-shell { max-width: 480px; margin: 0 auto; padding: 10px 12px; }
 
-    /* Header */
     .header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      padding: 15px 5px;
-      background: rgba(15,23,42,0.8);
-      backdrop-filter: blur(12px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      position: sticky; top: 0; z-index: 50; padding: 15px 5px;
+      background: rgba(15,23,42,0.8); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: space-between;
     }
+
     .app-icon {
       width: 36px; height: 36px; border-radius: 10px;
       background: linear-gradient(135deg, #38bdf8, #2563eb);
@@ -73,124 +46,47 @@
       box-shadow: 0 0 20px rgba(37,99,235,0.4);
     }
 
-    /* Pages */
     .page { display: none; animation: fadeIn 0.3s ease; }
     .active-page { display: block; }
 
-    /* Scanner info card */
-    .scanner-card {
-      background: var(--card-soft);
-      border-radius: 24px;
-      padding: 16px;
-      border: 1px solid var(--border);
-      margin-top: 10px;
-      text-align: center;
-      font-size: 14px;
-      color: var(--text-muted);
+    .card {
+      background: rgba(15,23,42,0.6); padding: 20px;
+      border-radius: 20px; margin-top: 15px; border: 1px solid var(--border);
+      transition: all 0.3s ease;
     }
 
-    /* Inputs */
-    .card {
-      background: rgba(15,23,42,0.6);
-      padding: 20px;
-      border-radius: 20px;
-      margin-top: 15px;
-      border: 1px solid var(--border);
-    }
-    label {
-      display: block;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin: 12px 0 5px;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
+    /* Success Flash Effect */
+    .flash-success { border-color: var(--success) !important; box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); }
+
+    label { display: block; font-size: 11px; color: var(--text-muted); margin: 12px 0 5px; text-transform: uppercase; font-weight: 600; }
+    
     input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #020617;
-      color: white;
-      font-size: 16px;
-      outline: none;
+      width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border);
+      background: #020617; color: white; font-size: 16px; outline: none;
     }
-    input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px var(--primary-soft);
-    }
+
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
 
     .btn-main {
-      width: 100%;
-      padding: 16px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 14px;
-      background: linear-gradient(to right, #2563eb, #4f46e5);
-      color: white;
-      font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
+      width: 100%; padding: 16px; margin-top: 20px; border: none; border-radius: 14px;
+      background: linear-gradient(to right, #2563eb, #4f46e5); color: white;
+      font-weight: 600; font-size: 16px; cursor: pointer;
     }
-    .btn-main:active { transform: scale(0.98); }
+
+    .btn-main:disabled { opacity: 0.6; }
 
     /* History Table */
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th {
-      text-align: left;
-      font-size: 11px;
-      color: var(--text-muted);
-      padding: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-    td {
-      padding: 12px 10px;
-      font-size: 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .btn-edit {
-      background: var(--primary-soft);
-      color: #60a5fa;
-      border: 1px solid var(--primary);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-    }
+    th { text-align: left; font-size: 11px; color: var(--text-muted); padding: 10px; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 10px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
     /* Nav */
-    .nav-shell {
-      position: fixed;
-      bottom: 15px;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      z-index: 100;
-    }
-    .nav {
-      background: var(--nav-bg);
-      width: 90%;
-      max-width: 400px;
-      height: 65px;
-      border-radius: 30px;
-      display: flex;
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    .nav-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 11px;
-    }
+    .nav-shell { position: fixed; bottom: 15px; width: 100%; display: flex; justify-content: center; z-index: 100; }
+    .nav { background: var(--nav-bg); width: 90%; max-width: 400px; height: 65px; border-radius: 30px; display: flex; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 11px; }
     .nav-item.active { color: var(--primary); }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
@@ -201,29 +97,24 @@
         <div class="app-icon">📦</div>
         <div>
           <div style="font-weight:600; font-size:16px;">Inventory Pro</div>
-          <div style="font-size:11px; color:var(--text-muted);">Scanner: EDA52 Keyboard</div>
+          <div style="font-size:11px; color:var(--text-muted);">EDA52 Scanner Active</div>
         </div>
       </div>
     </header>
 
     <main id="scan-page" class="page active-page">
-      <div class="scanner-card">
-        Focus the “Item ID” field and scan with the EDA52 scanner.  
-        The scanned code will appear automatically, then cursor jumps to Quantity.
-      </div>
+      <div class="card" id="input-card">
+        <label>Current Location</label>
+        <input type="text" id="location" placeholder="Rack / Zone">
 
-      <div class="card">
-        <label>Current Location (Sticky)</label>
-        <input type="text" id="location" placeholder="Set warehouse/rack">
-
-        <label>Item ID</label>
-        <input type="text" id="qr-result" placeholder="Scan a code..." autocomplete="off">
+        <label>Item ID (Scan)</label>
+        <input type="text" id="qr-result" placeholder="Scan barcode..." autocomplete="off">
 
         <label>Quantity</label>
         <input type="number" id="quantity" placeholder="0" inputmode="numeric">
 
         <button class="btn-main" id="submit-btn" onclick="submitData()">Submit Entry</button>
-        <div id="status" style="text-align:center; margin-top:12px; font-size:13px;"></div>
+        <div id="status" style="text-align:center; margin-top:15px; font-size:14px; font-weight:600;"></div>
       </div>
     </main>
 
@@ -232,15 +123,10 @@
         <h3 style="margin:0;">Recent Logs</h3>
         <span id="log-count" style="font-size:12px; color:var(--text-muted);">0 items</span>
       </div>
-      <div class="card" style="padding: 5px;">
-        <table id="history-table">
+      <div class="card" style="padding: 5px; overflow-x: auto;">
+        <table>
           <thead>
-            <tr>
-              <th>Time</th>
-              <th>Item ID</th>
-              <th>Qty</th>
-              <th>Action</th>
-            </tr>
+            <tr><th>Time</th><th>Item</th><th>Qty</th></tr>
           </thead>
           <tbody id="history-body"></tbody>
         </table>
@@ -250,43 +136,55 @@
 
   <div class="nav-shell">
     <nav class="nav">
-      <div class="nav-item active" id="nav-scan"
-           onclick="showPage('scan-page','nav-scan')">
+      <div class="nav-item active" id="nav-scan" onclick="showPage('scan-page','nav-scan')">
         <span style="font-size:20px;">📷</span><span>Scanner</span>
       </div>
-      <div class="nav-item" id="nav-hist"
-           onclick="showPage('history-page','nav-hist')">
+      <div class="nav-item" id="nav-hist" onclick="showPage('history-page','nav-hist')">
         <span style="font-size:20px;">📜</span><span>History</span>
       </div>
     </nav>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyzRxmu4a0KVQ01lJPURKMkxK8Chb0vlc8oJaW6nxRPny8J1usb81Cj01s5qmKvo1dBSA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoKjpNBR-aKshsZhdI0Bkjvurl4T_y7h9S8KKZKJF8GLgH1UvczlpJoRfoBUG6dyxfvg/exec";
 
-    // Load sticky location from localStorage
-    window.addEventListener('load', () => {
-      const savedLoc = localStorage.getItem('inv_location') || '';
-      document.getElementById('location').value = savedLoc;
-      document.getElementById('qr-result').focus();
-    });
+    // Audio Context for Beep
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(type) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(type === 'success' ? 880 : 220, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
 
-    // Save location when changed (sticky)
-    document.getElementById('location').addEventListener('change', (e) => {
-      localStorage.setItem('inv_location', e.target.value);
-    });
+    const qrInput = document.getElementById('qr-result');
+    const qtyInput = document.getElementById('quantity');
+    const locInput = document.getElementById('location');
+    const inputCard = document.getElementById('input-card');
 
-    // After scanner sends Enter in Item ID, go to Quantity
-    document.getElementById('qr-result').addEventListener('keydown', (e) => {
+    window.onload = () => {
+      locInput.value = localStorage.getItem('inv_loc') || "";
+      qrInput.focus();
+    };
+
+    // Scanner Logic: Jump to Qty on Enter
+    qrInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        if (navigator.vibrate) navigator.vibrate(30);
-        document.getElementById('quantity').focus();
+        if (qrInput.value.trim() !== "") {
+          qtyInput.focus();
+          if (navigator.vibrate) navigator.vibrate(30);
+        }
       }
     });
 
-    // Press Enter in Quantity to auto-submit
-    document.getElementById('quantity').addEventListener('keydown', (e) => {
+    // Auto-submit on Enter in Qty
+    qtyInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         submitData();
@@ -301,91 +199,58 @@
     }
 
     async function submitData() {
-  // ... (keep your existing data gathering logic) ...
-
-  try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      // Changing Content-Type to text/plain avoids the "Pre-flight" block
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-      body: JSON.stringify(data) 
-    });
-
-    // ... (keep your success logic) ...
-    status.innerHTML = "<span style='color:var(--success)'>✅ Saved!</span>";
-  } catch (e) {
-    status.innerHTML = "<span style='color:var(--danger)'>❌ Error: " + e.message + "</span>";
-  }
-};
-
-      console.log('Submitting data:', data);
+      const btn = document.getElementById('submit-btn');
+      const status = document.getElementById('status');
+      
+      const data = {
+        location: locInput.value.trim(),
+        qrData: qrInput.value.trim(),
+        quantity: qtyInput.value.trim()
+      };
 
       if (!data.qrData || !data.quantity) {
-        alert("Scan item and enter quantity!");
+        status.innerHTML = "<span style='color:var(--danger)'>❌ Error: Fill all fields</span>";
+        playBeep('error');
         return;
       }
 
       btn.disabled = true;
-      btn.innerText = "Syncing...";
-      status.innerText = "Sending to Google Sheets...";
+      status.innerText = "Syncing with Cloud...";
+      localStorage.setItem('inv_loc', data.location);
 
       try {
         await fetch(SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify(data)
         });
 
-        const res = {
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          ...data
-        };
-        addToHistory(res);
-
-        // Clear only item & qty, keep location
-        document.getElementById('qr-result').value = "";
-        document.getElementById('quantity').value = "";
-        document.getElementById('qr-result').focus();
-
+        // Success UI
         status.innerHTML = "<span style='color:var(--success)'>✅ Saved Successfully!</span>";
-      } catch (e) {
-        console.error(e);
+        inputCard.classList.add('flash-success');
+        playBeep('success');
+        
+        // Add to History
+        const row = document.getElementById('history-body').insertRow(0);
+        row.innerHTML = `<td>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td><td>${data.qrData}</td><td>${data.quantity}</td>`;
+        document.getElementById('log-count').innerText = document.getElementById('history-body').rows.length + " items";
+
+        // Reset
+        qrInput.value = "";
+        qtyInput.value = "";
+        setTimeout(() => {
+          inputCard.classList.remove('flash-success');
+          status.innerText = "";
+          qrInput.focus();
+        }, 1500);
+
+      } catch (err) {
         status.innerHTML = "<span style='color:var(--danger)'>❌ Network Error</span>";
+        playBeep('error');
+        btn.disabled = false;
       } finally {
         btn.disabled = false;
-        btn.innerText = "Submit Entry";
-        setTimeout(() => status.innerText = "", 3000);
-      }
-    }
-
-    function addToHistory(res) {
-      const tbody = document.getElementById('history-body');
-      const safeId = res.qrData.replace(/[^a-zA-Z0-9_-]/g, '_') + "_" + Date.now();
-      const row = tbody.insertRow(0);
-      row.id = `row-${safeId}`;
-      row.innerHTML = `
-        <td>${res.time}</td>
-        <td>${res.qrData}</td>
-        <td class="qty-val">${res.quantity}</td>
-        <td><button class="btn-edit" onclick="editEntry('${safeId}', '${res.quantity}', '${res.qrData}')">EDIT</button></td>
-      `;
-      document.getElementById('log-count').innerText = tbody.rows.length + " items";
-    }
-
-    async function editEntry(rowKey, oldQty, idLabel) {
-      const newQty = prompt(`Edit Quantity for ${idLabel}:`, oldQty);
-      if (newQty && newQty !== oldQty) {
-        const row = document.getElementById(`row-${rowKey}`);
-        if (row) {
-          row.querySelector('.qty-val').innerText = newQty;
-        }
-        fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          body: JSON.stringify({ action: "edit", qrData: idLabel, quantity: newQty })
-        });
       }
     }
   </script>
