@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inventory QR Scanner</title>
-
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <title>Inventory Scanner</title>
 
   <style>
     body {
@@ -54,13 +52,6 @@
       background: gray;
     }
 
-    #reader {
-      width: 100%;
-      border-radius: 10px;
-      overflow: hidden;
-      background: black;
-    }
-
     #status {
       margin-top: 10px;
       text-align: center;
@@ -70,18 +61,14 @@
 </head>
 
 <body>
-  <h2>Inventory QR Scanner</h2>
-
-  <div class="card">
-    <div id="reader"></div>
-  </div>
+  <h2>Inventory Scanner</h2>
 
   <div class="card">
     <label for="location">Location</label>
     <input type="text" id="location" placeholder="Warehouse / Rack">
 
     <label for="qr-result">Item Code</label>
-    <input type="text" id="qr-result" readonly>
+    <input type="text" id="qr-result" placeholder="Scan with EDA52">
 
     <label for="quantity">Quantity</label>
     <input type="number" id="quantity" placeholder="Enter quantity">
@@ -94,67 +81,18 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAUJb_jrTmGnbGeKYx9RCR5njmT7v-CF2HS0qCjxOmXn7XgGRn5a19c2gwnPDjaHH6xQ/exec";
 
-    let html5QrCode;
-
-    function startScanner() {
-      html5QrCode = new Html5Qrcode("reader");
-
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length > 0) {
-          let backCamera = devices.find(device =>
-            device.label.toLowerCase().includes("back")
-          );
-          let cameraId = backCamera ? backCamera.id : devices[0].id;
-
-          html5QrCode.start(
-            cameraId,
-            {
-              fps: 10,
-              qrbox: { width: 250, height: 250 }
-            },
-            qrCodeMessage => {
-              document.getElementById("qr-result").value = qrCodeMessage;
-              html5QrCode.stop();
-              document.getElementById("quantity").focus();
-              if (navigator.vibrate) navigator.vibrate(100);
-            }
-          ).catch(err => {
-            alert("Camera failed. Use HTTPS and allow permission.");
-            console.log(err);
-          });
-        } else {
-          alert("No camera found.");
-        }
-      }).catch(err => {
-        alert("Camera permission denied.");
-        console.log(err);
-      });
-    }
-
-    window.addEventListener("load", () => {
-      if (location.protocol !== "https:" && location.hostname !== "localhost") {
-        alert("Camera works only on HTTPS or localhost.");
-        return;
-      }
-      startScanner();
-    });
-
-    document
-      .getElementById("submit-btn")
-      .addEventListener("click", submitData);
-
-    async function submitData() {
+    document.getElementById("submit-btn").addEventListener("click", async () => {
       const btn = document.getElementById("submit-btn");
       const status = document.getElementById("status");
 
       const data = {
-        qrData: document.getElementById("qr-result").value,
-        quantity: document.getElementById("quantity").value,
-        location: document.getElementById("location").value
+        qrData: document.getElementById("qr-result").value.trim(),
+        quantity: document.getElementById("quantity").value.trim(),
+        location: document.getElementById("location").value.trim()
       };
 
       if (!data.qrData || !data.quantity) {
-        alert("Scan QR and enter quantity.");
+        alert("Scan item code and enter quantity.");
         return;
       }
 
@@ -176,7 +114,7 @@
           document.getElementById("qr-result").value = "";
           document.getElementById("quantity").value = "";
           document.getElementById("location").value = "";
-          startScanner();
+          document.getElementById("qr-result").focus();
         } else {
           status.innerText = "Server error.";
         }
@@ -186,7 +124,7 @@
 
       btn.disabled = false;
       btn.innerText = "Submit";
-    }
+    });
   </script>
 </body>
 </html>
