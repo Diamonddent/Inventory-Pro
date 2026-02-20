@@ -4,136 +4,620 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Diamond Dent | Inventory OS</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #050505;
-      --card: rgba(255, 255, 255, 0.05);
+      --card: rgba(255, 255, 255, 0.03);
       --accent: #00f2ff;
-      --accent-glow: rgba(0, 242, 255, 0.3);
+      --accent-glow: rgba(0, 242, 255, 0.4);
       --text: #ffffff;
-      --muted: #888888;
-      --border: rgba(255, 255, 255, 0.1);
+      --muted: #666666;
+      --border: rgba(255, 255, 255, 0.08);
+      --success: #00ff88;
+      --warning: #ffcc00;
+      --error: #ff4444;
     }
 
-    * { box-sizing: border-box; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+    * { 
+      box-sizing: border-box; 
+      -webkit-font-smoothing: antialiased; 
+      -webkit-tap-highlight-color: transparent;
+    }
     
     body {
       font-family: 'Space Grotesk', sans-serif;
-      margin: 0; background: var(--bg); color: var(--text);
-      min-height: 100vh; overflow-x: hidden;
+      margin: 0; 
+      background: var(--bg); 
+      color: var(--text);
+      min-height: 100vh; 
+      overflow-x: hidden;
       padding-bottom: 100px;
     }
 
-    body::before {
-      content: ''; position: fixed; top: -10%; left: -10%; width: 50%; height: 50%;
-      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-      z-index: -1; pointer-events: none;
+    /* Animated Background Mesh */
+    .bg-mesh {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -2;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(0, 242, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(58, 123, 213, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(0, 242, 255, 0.05) 0%, transparent 30%);
+      animation: meshMove 20s ease-in-out infinite;
     }
 
-    .container { max-width: 500px; margin: 0 auto; padding: 25px; }
+    @keyframes meshMove {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -30px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+    }
+
+    /* Grid Overlay */
+    .grid-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .container { 
+      max-width: 500px; 
+      margin: 0 auto; 
+      padding: 25px; 
+    }
 
     /* Header */
-    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-    .brand { font-weight: 700; font-size: 20px; letter-spacing: 2px; }
+    .app-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 40px;
+      animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand { 
+      font-weight: 700; 
+      font-size: 20px; 
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+
+    .brand::after {
+      content: '';
+      position: absolute;
+      bottom: -5px; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: expandLine 1s ease-out 0.5s forwards;
+    }
+
+    @keyframes expandLine {
+      to { transform: scaleX(1); }
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
     
     .status-dot {
-      width: 10px; height: 10px; border-radius: 50%; background: #00ff88;
-      box-shadow: 0 0 10px #00ff88; transition: 0.3s;
+      width: 8px; height: 8px; 
+      border-radius: 50%; 
+      background: var(--success);
+      box-shadow: 0 0 15px var(--success);
+      transition: all 0.3s ease;
+      position: relative;
     }
-    .status-dot.syncing { background: #ffcc00; box-shadow: 0 0 10px #ffcc00; animation: pulse 1s infinite; }
-    .status-dot.error { background: #ff4444; box-shadow: 0 0 10px #ff4444; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+    .status-dot::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1px solid var(--success);
+      opacity: 0;
+      animation: ripple 2s infinite;
+    }
+
+    @keyframes ripple {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    .status-dot.syncing { 
+      background: var(--warning); 
+      box-shadow: 0 0 15px var(--warning);
+      animation: spin 1s linear infinite;
+    }
+
+    .status-dot.error { 
+      background: var(--error); 
+      box-shadow: 0 0 15px var(--error);
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
 
     /* Glass Panels */
     .glass-panel {
-      background: var(--card); backdrop-filter: blur(20px);
-      border: 1px solid var(--border); border-radius: 30px;
-      padding: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      background: var(--card); 
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border); 
+      border-radius: 24px;
+      padding: 30px; 
+      box-shadow: 
+        0 25px 50px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 30px 60px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Inputs */
-    .input-wrap { margin-bottom: 20px; }
-    label { font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; display: block; }
+    .input-wrap { 
+      margin-bottom: 28px; 
+      position: relative;
+    }
+
+    .input-wrap label { 
+      font-size: 10px; 
+      font-weight: 700; 
+      color: var(--accent); 
+      text-transform: uppercase; 
+      letter-spacing: 2px; 
+      margin-bottom: 10px; 
+      display: block;
+      transform: translateY(0);
+      transition: all 0.3s ease;
+    }
+
+    .input-wrap:focus-within label {
+      color: #fff;
+      text-shadow: 0 0 10px var(--accent-glow);
+    }
     
     input {
-      width: 100%; background: transparent; border: none; border-bottom: 2px solid var(--border);
-      padding: 10px 0; font-size: 18px; color: #fff; transition: 0.3s; font-family: inherit;
+      width: 100%; 
+      background: rgba(255,255,255,0.02); 
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px; 
+      font-size: 16px; 
+      color: #fff; 
+      transition: all 0.3s ease; 
+      font-family: inherit;
     }
-    input:focus { border-bottom-color: var(--accent); outline: none; }
 
-    .btn-action {
-      width: 100%; padding: 18px; border-radius: 18px; border: none;
-      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-      color: white; font-weight: 700; font-size: 16px; cursor: pointer;
-      box-shadow: 0 10px 20px rgba(58, 123, 213, 0.3); margin-top: 10px;
+    input:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.15);
     }
-    .btn-action:active { transform: scale(0.98); }
+
+    input:focus { 
+      border-color: var(--accent); 
+      background: rgba(0, 242, 255, 0.05);
+      outline: none;
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+    }
+
+    input::placeholder {
+      color: var(--muted);
+      transition: all 0.3s ease;
+    }
+
+    input:focus::placeholder {
+      opacity: 0.5;
+      transform: translateX(10px);
+    }
+
+    /* Button */
+    .btn-action {
+      width: 100%; 
+      padding: 18px; 
+      border-radius: 16px; 
+      border: none;
+      background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+      color: white; 
+      font-weight: 700; 
+      font-size: 16px; 
+      cursor: pointer;
+      box-shadow: 
+        0 10px 30px rgba(58, 123, 213, 0.4),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-action::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 15px 40px rgba(58, 123, 213, 0.5),
+        inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+
+    .btn-action:hover::before {
+      left: 100%;
+    }
+
+    .btn-action:active { 
+      transform: scale(0.98) translateY(0); 
+    }
+
+    .btn-action.success {
+      background: linear-gradient(135deg, var(--success) 0%, #00cc6a 100%);
+      animation: successPulse 0.5s ease;
+    }
+
+    @keyframes successPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
 
     /* Table Styling */
-    .table-container { overflow-x: auto; width: 100%; }
+    .table-container { 
+      overflow-x: auto; 
+      width: 100%;
+      border-radius: 16px;
+    }
+
     table {
-      width: 100%; border-collapse: collapse; margin-top: 5px;
-      color: var(--text); font-size: 13px; min-width: 350px;
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-top: 5px;
+      color: var(--text); 
+      font-size: 13px; 
+      min-width: 350px;
     }
+
     th {
-      text-align: left; color: var(--accent); font-size: 9px;
-      text-transform: uppercase; letter-spacing: 1px;
-      padding: 12px 8px; border-bottom: 2px solid var(--border);
+      text-align: left; 
+      color: var(--accent); 
+      font-size: 9px;
+      text-transform: uppercase; 
+      letter-spacing: 1.5px;
+      padding: 16px 12px; 
+      border-bottom: 2px solid var(--border);
+      font-weight: 700;
     }
+
     td {
-      padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 16px 12px; 
+      border-bottom: 1px solid rgba(255,255,255,0.05);
       white-space: nowrap;
+      transition: all 0.3s ease;
     }
-    .col-id { font-weight: 500; color: #fff; }
-    .col-loc { color: var(--muted); }
-    .col-qty { font-weight: 700; color: var(--accent); text-align: center; }
-    .col-time { font-size: 10px; color: var(--muted); }
+
+    tr {
+      animation: fadeInRow 0.4s ease backwards;
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,0.03);
+      color: #fff;
+    }
+
+    @keyframes fadeInRow {
+      from { 
+        opacity: 0; 
+        transform: translateX(-20px);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateX(0);
+      }
+    }
+
+    .col-id { 
+      font-weight: 500; 
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .col-loc { 
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .col-qty { 
+      font-weight: 700; 
+      color: var(--accent);
+      text-align: center;
+      font-size: 14px;
+      text-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .col-time { 
+      font-size: 11px; 
+      color: var(--muted);
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state svg {
+      width: 48px; height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+      stroke: var(--accent);
+    }
 
     /* Bottom Dock */
-    .dock-container { position: fixed; bottom: 30px; width: 100%; display: flex; justify-content: center; z-index: 100; }
-    .dock {
-      background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(25px);
-      padding: 6px; border-radius: 20px; border: 1px solid var(--border);
-      display: flex; gap: 8px;
+    .dock-container { 
+      position: fixed; 
+      bottom: 30px; 
+      width: 100%; 
+      display: flex; 
+      justify-content: center; 
+      z-index: 100;
+      animation: slideUpDock 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
     }
-    .dock-btn {
-      padding: 10px 20px; border-radius: 15px; border: none; background: transparent;
-      color: var(--muted); font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 12px;
-    }
-    .dock-btn.active { background: var(--accent); color: #000; }
 
-    .hidden { display: none; }
+    @keyframes slideUpDock {
+      from { opacity: 0; transform: translateY(100px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dock {
+      background: rgba(255, 255, 255, 0.05); 
+      backdrop-filter: blur(25px);
+      padding: 6px; 
+      border-radius: 20px; 
+      border: 1px solid var(--border);
+      display: flex; 
+      gap: 8px;
+      box-shadow: 
+        0 20px 40px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .dock-btn {
+      padding: 12px 24px; 
+      border-radius: 16px; 
+      border: none; 
+      background: transparent;
+      color: var(--muted); 
+      font-weight: 700; 
+      cursor: pointer; 
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dock-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      border-radius: 16px;
+      transform: scale(0);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: -1;
+    }
+
+    .dock-btn.active { 
+      color: #000;
+      transform: scale(1.05);
+    }
+
+    .dock-btn.active::before {
+      transform: scale(1);
+    }
+
+    .dock-btn:not(.active):hover {
+      color: #fff;
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* View Transitions */
+    .view {
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hidden { 
+      display: none; 
+    }
+
+    /* Scan Line Effect */
+    .scan-line {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .input-wrap:focus-within .scan-line {
+      animation: scanMove 2s linear infinite;
+      opacity: 1;
+    }
+
+    @keyframes scanMove {
+      0% { transform: translateY(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(50px); opacity: 0; }
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: 25px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(0,0,0,0.9);
+      border: 1px solid var(--border);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #fff;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(10px);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success { border-color: var(--success); color: var(--success); }
+    .toast.error { border-color: var(--error); color: var(--error); }
+
+    /* Stats Badge */
+    .stats-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 242, 255, 0.1);
+      border: 1px solid rgba(0, 242, 255, 0.2);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container { padding: 20px; }
+      .glass-panel { padding: 24px; }
+      .dock-btn { padding: 10px 20px; }
+    }
   </style>
 </head>
 <body>
 
+  <div class="bg-mesh"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="toast" id="toast"></div>
+
   <div class="container">
     <header class="app-header">
       <div class="brand">DIAMOND STORE</div>
-      <div class="status-dot" id="sync-dot"></div>
+      <div class="status-indicator">
+        <span id="status-text">Online</span>
+        <div class="status-dot" id="sync-dot"></div>
+      </div>
     </header>
 
     <div id="view-scan" class="view">
       <div class="glass-panel">
+        <div class="stats-badge">
+          <span>●</span>
+          <span id="entry-count">Ready to scan</span>
+        </div>
+        
         <div class="input-wrap">
           <label>Location</label>
-          <input type="text" id="loc" placeholder="Bin/Rack" autocomplete="off">
+          <div style="position: relative;">
+            <input type="text" id="loc" placeholder="Bin/Rack" autocomplete="off">
+            <div class="scan-line"></div>
+          </div>
         </div>
+        
         <div class="input-wrap">
           <label>Item ID (Scan)</label>
-          <input type="text" id="asset" placeholder="Ready for barcode..." autocomplete="off">
+          <div style="position: relative;">
+            <input type="text" id="asset" placeholder="Ready for barcode..." autocomplete="off">
+            <div class="scan-line"></div>
+          </div>
         </div>
+        
         <div class="input-wrap">
           <label>Quantity</label>
-          <input type="number" id="qty" placeholder="1" inputmode="numeric">
+          <div style="position: relative;">
+            <input type="number" id="qty" placeholder="1" inputmode="numeric">
+            <div class="scan-line"></div>
+          </div>
         </div>
-        <button class="btn-action" onclick="pushData()">Upload Entry</button>
+        
+        <button class="btn-action" id="submit-btn" onclick="pushData()">
+          <span>Upload Entry</span>
+        </button>
       </div>
     </div>
 
     <div id="view-history" class="view hidden">
       <div class="glass-panel">
+        <div class="stats-badge">
+          <span>◈</span>
+          <span id="log-count">0 entries</span>
+        </div>
+        
         <div class="table-container">
           <table>
             <thead>
@@ -144,7 +628,18 @@
                 <th style="text-align: center;">Qty</th>
               </tr>
             </thead>
-            <tbody id="history-body"></tbody>
+            <tbody id="history-body">
+              <tr class="empty-row">
+                <td colspan="4">
+                  <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <div>No entries yet</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -159,21 +654,27 @@
   </div>
 
   <script>
-    // Configuration from Original Script
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoKjpNBR-aKshsZhdI0Bkjvurl4T_y7h9S8KKZKJF8GLgH1UvczlpJoRfoBUG6dyxfvg/exec";
     
     const assetIn = document.getElementById('asset');
     const qtyIn = document.getElementById('qty');
     const locIn = document.getElementById('loc');
     const syncDot = document.getElementById('sync-dot');
+    const statusText = document.getElementById('status-text');
+    const submitBtn = document.getElementById('submit-btn');
+    const toast = document.getElementById('toast');
+    const entryCount = document.getElementById('entry-count');
+    const logCount = document.getElementById('log-count');
 
-    // Startup Logic
+    let entries = JSON.parse(localStorage.getItem('diamond_entries') || '[]');
+
     window.onload = () => {
       locIn.value = localStorage.getItem('turbo_loc') || "";
+      updateEntryCount();
+      renderHistory();
       assetIn.focus();
     };
 
-    // Auto-focus jump (Item ID -> Quantity)
     assetIn.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -184,7 +685,6 @@
       }
     });
 
-    // Auto-submit on Enter in Quantity
     qtyIn.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -196,48 +696,103 @@
       if (navigator.vibrate) navigator.vibrate(ms);
     }
 
+    function showToast(message, type = 'success') {
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function updateEntryCount() {
+      const count = entries.length;
+      entryCount.textContent = count > 0 ? `${count} entries cached` : 'Ready to scan';
+      logCount.textContent = `${count} entries`;
+    }
+
     function switchTab(tab) {
       const isScan = tab === 'scan';
       document.getElementById('view-scan').classList.toggle('hidden', !isScan);
       document.getElementById('view-history').classList.toggle('hidden', isScan);
       document.getElementById('btn-scan').classList.toggle('active', isScan);
       document.getElementById('btn-hist').classList.toggle('active', !isScan);
-      if(isScan) assetIn.focus();
+      
+      if(isScan) {
+        setTimeout(() => assetIn.focus(), 100);
+      } else {
+        renderHistory();
+      }
+    }
+
+    function renderHistory() {
+      const tbody = document.getElementById('history-body');
+      if (entries.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <div>No entries yet</div>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = entries.slice().reverse().map((entry, index) => `
+        <tr style="animation-delay: ${index * 0.05}s">
+          <td class="col-id">${entry.qrData}</td>
+          <td class="col-loc">${entry.location || 'N/A'}</td>
+          <td class="col-time">${entry.time}</td>
+          <td class="col-qty">${entry.quantity}</td>
+        </tr>
+      `).join('');
     }
 
     function pushData() {
       const payload = {
         location: locIn.value.trim(),
         qrData: assetIn.value.trim(),
-        quantity: qtyIn.value.trim()
+        quantity: qtyIn.value.trim(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
-      if (!payload.qrData || !payload.quantity) return;
+      if (!payload.qrData || !payload.quantity) {
+        showToast('Please fill in all fields', 'error');
+        haptic([50, 50, 50]);
+        return;
+      }
 
       // Haptic & Local Storage
       haptic(50);
       localStorage.setItem('turbo_loc', payload.location);
 
-      // Optimistic UI Update
-      const tableBody = document.getElementById('history-body');
-      const row = document.createElement('tr');
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      
-      row.innerHTML = `
-        <td class="col-id">${payload.qrData}</td>
-        <td class="col-loc">${payload.location || 'N/A'}</td>
-        <td class="col-time">${timeStr}</td>
-        <td class="col-qty">${payload.quantity}</td>
-      `;
-      tableBody.prepend(row);
+      // Add to entries
+      entries.push(payload);
+      localStorage.setItem('diamond_entries', JSON.stringify(entries));
+      updateEntryCount();
 
-      // Reset Form for next scan
+      // Button success animation
+      submitBtn.classList.add('success');
+      submitBtn.innerHTML = '<span>✓ Uploaded</span>';
+      setTimeout(() => {
+        submitBtn.classList.remove('success');
+        submitBtn.innerHTML = '<span>Upload Entry</span>';
+      }, 1500);
+
+      showToast('Entry saved successfully');
+
+      // Reset Form
       assetIn.value = "";
       qtyIn.value = "";
       assetIn.focus();
 
-      // Background Sync to Google Sheets
+      // Background Sync
       syncDot.classList.add('syncing');
+      statusText.textContent = 'Syncing...';
       
       fetch(SCRIPT_URL, {
         method: "POST",
@@ -246,10 +801,19 @@
         body: JSON.stringify(payload)
       }).then(() => {
         syncDot.classList.remove('syncing');
-        syncDot.style.background = "#00ff88"; // Back to green
+        syncDot.style.background = "var(--success)";
+        statusText.textContent = 'Online';
+        showToast('Synced to cloud');
       }).catch(() => {
         syncDot.classList.remove('syncing');
         syncDot.classList.add('error');
+        statusText.textContent = 'Offline';
+        showToast('Saved locally - sync failed', 'error');
+        setTimeout(() => {
+          syncDot.classList.remove('error');
+          syncDot.style.background = "var(--success)";
+          statusText.textContent = 'Online';
+        }, 3000);
       });
     }
   </script>
